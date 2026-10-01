@@ -249,4 +249,91 @@ of the 3 commits builds and passes on its own.
 
 ---
 
+## 04 — Percentage fix + Phase 2: REST API layer
+
+| Field | Value |
+|---|---|
+| **Model** | Claude Opus 5.5 |
+| **Mode** | Auto mode |
+| **Skills** | — (no specialized skill applies to a Go HTTP layer) |
+| **Subagents** | `general-purpose` — black-box contract tester: received only the API contract, not the source, and wrote `contract_test.go` (37 subtests) |
+| **Tools** | Bash (go build/vet/test, go tool cover, curl, git), Read, Write, Edit, Agent |
+| **Phase** | 2 — API layer |
+
+**Prompt:**
+```text
+Phase 1 approved. Before Phase 2:
+
+0. Add this rule to CLAUDE.md under "Working rules" and commit it (chore: ...):
+   "Use skills and subagents whenever they add independent value (e.g. a subagent
+   that tests or reviews without seeing the implementation, a skill for a specialized
+   domain). Never use them just for show. Justify each one in the phase report."
+
+1. Bug found in review: percentage computes (a/100)*b, which gives
+   percentage(7,100) = 7.000000000000001 and percentage(29,100) = 28.999999999999996.
+   Change it to a*b/100 (exact for typical inputs; extreme overflow is still caught as
+   RESULT_OUT_OF_RANGE). Add both cases as regression tests, show them failing first,
+   then fix. Commit as fix(calculator): ...
+
+Then Phase 2 — API layer, as planned (413/415, /operations wrapped in an object).
+Also handle and test these transport edge cases:
+- null inside operands: [1, null] must be 400, not silently decoded as 0
+  (Go decodes null into float64 as zero — that would turn it into a division by zero).
+- numbers sent as strings ("2") -> 400.
+- trailing data after the JSON object ({...}{...}) -> 400.
+- Content-Type "application/json; charset=utf-8" must be accepted (parse the media type).
+- operands: [] and operands missing are both MISSING_FIELD or INVALID_OPERAND_COUNT —
+  pick one, be consistent, document it.
+
+Subagent: once the handlers compile, spawn a general-purpose subagent that receives
+ONLY the API contract (endpoints, status codes, error codes — not the source code)
+and writes black-box contract tests in backend/internal/api/contract_test.go using
+httptest against the real router. Fix any failure it finds and report what it caught.
+
+Finish with go vet, go test -cover ./..., and a curl smoke test of every operation
+and every error code against the running server. Include the curl commands in the
+report so I can rerun some of them myself. Give me the Phase 2 report.
+```
+
+**Human actions & decisions:**
+- **Found a precision bug in code review** (the Phase 1 tests passed): `percentage` computed
+  `(a/100)*b`, so `7% of 100` returned `7.000000000000001`. I reproduced it, then required
+  `a*b/100`, which is exact for typical inputs; the only cost is overflow slightly earlier for
+  values near 1e306, already caught as `RESULT_OUT_OF_RANGE`. Required regression tests
+  red-first.
+- **Added transport edge cases the plan missed:**
+  - `null` inside `operands`: Go silently decodes `null` into a `float64` as `0`, so
+    `divide [1, null]` would surface as a misleading division by zero instead of bad input.
+  - Numbers sent as strings.
+  - Trailing data after the JSON object.
+  - `application/json; charset=utf-8` must be accepted, because real clients send it.
+- **Made skill/subagent usage a project rule** in `CLAUDE.md`: use them only when they add
+  independent value, and justify each one in the phase report.
+- **Manually verified the running server** with curl from a separate terminal: a normal sum,
+  `7% of 100` → `7` (the fix), division by zero → 422 `DIVISION_BY_ZERO`, `[1, null]` →
+  400 instead of a false division by zero, and malformed JSON → 400 `INVALID_JSON`.
+  All responses matched the contract.
+- **Designed the subagent's role:** a black-box tester that never sees the implementation,
+  so its tests check the contract instead of mirroring the code.
+- Reviewed and accepted Claude's decisions:
+  - `operands` missing or `[]` → `INVALID_OPERAND_COUNT`, one code for "wrong number of operands".
+  - `Run` refactored into `Serve(ctx)` so graceful shutdown is testable without OS signals.
+  - Feature commits merged where splitting them would break the build.
+
+**Outcome:**
+- Handlers for `/calculate`, `/operations` and `/healthz`; middleware for panic recovery,
+  `slog` logging and CORS; 413 / 415; graceful shutdown via `signal.NotifyContext`;
+  `PORT` environment variable.
+- The blind contract tests found no violations (37/37 pass); Claude re-ran them itself
+  instead of trusting the subagent's summary.
+- `go vet` clean; coverage on `internal/` is **97.6%** (api 96.3%, calculator 100%).
+
+**Commits:** `81c8df3` chore: require justifying skill and subagent use in phase reports ·
+`d76b1d8` fix(calculator): compute percentage as a*b/100 to avoid rounding error ·
+`6d2320d` feat(api): add DTOs and error mapping ·
+`0fbeb68` feat(api): implement handlers, middleware, and server wiring with graceful shutdown ·
+`747278f` test(api): add black-box contract tests from the published API spec
+
+---
+
 <!-- Next entries are appended below -->
