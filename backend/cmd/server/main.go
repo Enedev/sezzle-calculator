@@ -1,9 +1,14 @@
 package main
 
 import (
+	"context"
 	"log/slog"
-	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+
+	"sezzle-calculator/internal/api"
+	"sezzle-calculator/internal/calculator"
 )
 
 func main() {
@@ -11,16 +16,15 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"status":"ok"}`))
-	})
-
 	addr := ":" + port
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	registry := calculator.NewDefaultRegistry()
+
 	slog.Info("starting server", "addr", addr)
-	if err := http.ListenAndServe(addr, mux); err != nil {
+	if err := api.Serve(ctx, addr, registry); err != nil {
 		slog.Error("server failed", "error", err)
 		os.Exit(1)
 	}
