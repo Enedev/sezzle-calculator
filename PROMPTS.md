@@ -185,4 +185,68 @@ table for review (entry 03).
 
 ---
 
+## 03 — Test table review + Phase 1: calculator domain
+
+| Field | Value |
+|---|---|
+| **Model** | Claude Opus 5.5 |
+| **Mode** | Auto mode |
+| **Skills** | — |
+| **Subagents** | — |
+| **Tools** | Bash (go build/vet/test, go tool cover, git), Read, Write, Edit |
+| **Phase** | 1 — Calculator domain (TDD) |
+
+**Prompt:**
+```text
+Test table approved, and I accept the Registry.Calculate refinement:
+the domain owns math and contract rules, the API layer owns transport only.
+
+0. First: PROMPTS.md was rewritten after your last amend. Amend HEAD again so the
+   commit contains the current file: git add PROMPTS.md && git commit --amend --no-edit
+   Do not edit PROMPTS.md.
+
+Add these cases before implementing:
+1. add: 0.1 + 0.2 -> 0.30000000000000004. This test documents the float64
+   precision trade-off on purpose; reference it from the README later.
+2. Negative zero: Calculate normalizes -0 to 0 (e.g. multiply -4 × 0 -> 0, not -0),
+   so the API never returns "-0". Test it.
+3. Registry:
+   - registering the same operation name twice panics (programmer error);
+   - List() returns operations sorted by name (stable /operations output).
+4. NewDefaultRegistry() contains exactly the 7 expected operations.
+
+Then implement Phase 1: write the tests, run them and show them failing,
+then implement until green. Run go vet and go test -cover on internal/calculator.
+Commit following the plan and give me the Phase 1 report.
+```
+
+**Human actions & decisions:**
+- Reviewed the proposed edge-case test table before any implementation existed (TDD gate).
+- **Accepted `Registry.Calculate`:** one domain entry point owns arity validation and
+  NaN/±Inf classification, so the API layer only deals with transport concerns.
+- **Added `0.1 + 0.2` as an explicit test:** turns the float64 precision trade-off into
+  executable documentation instead of a README sentence.
+- **Added negative-zero normalization:** `-4 × 0` is `-0` in IEEE-754 and would serialize
+  as `"-0"` in JSON — technically valid, confusing on a calculator display.
+- **Added registry tests:** duplicate registration must panic (fail fast on a programmer
+  error) and `List()` must be sorted, because Go map iteration order is random and
+  `/operations` would otherwise change order between calls.
+- **Added a default-registry test:** guarantees all 7 operations stay registered.
+- Accepted Claude's change from 4 planned commits to 3: a tests-only commit would have
+  left the build broken in between, and every commit should build and pass on its own.
+- Verified the history: the `PROMPTS.md` fix was amended into the docs commit, and all
+  commits are authored by me with no AI trailers.
+
+**Outcome:** Operation interface, sorted registry with centralized `Calculate`, 5 sentinel
+errors and 7 operations, each in its own file with table-driven tests. Generic registry
+behavior is tested with stub operations, independent of the real ones.
+`go test ./internal/calculator/... -cover` → **100% coverage**, `go vet` clean, and each
+of the 3 commits builds and passes on its own.
+
+**Commits:** `e90698d` feat(calculator): add operation interface and registry ·
+`3a110f4` feat(calculator): implement arithmetic operations (add, subtract, multiply, divide) ·
+`969e108` feat(calculator): implement power, sqrt, percentage
+
+---
+
 <!-- Next entries are appended below -->
