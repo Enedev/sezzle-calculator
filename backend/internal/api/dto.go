@@ -47,6 +47,8 @@ const (
 	ErrCodeInvalidOperandCount  ErrorCode = "INVALID_OPERAND_COUNT"
 	ErrCodeUnsupportedMediaType ErrorCode = "UNSUPPORTED_MEDIA_TYPE"
 	ErrCodeRequestTooLarge      ErrorCode = "REQUEST_TOO_LARGE"
+	ErrCodeNotFound             ErrorCode = "NOT_FOUND"
+	ErrCodeMethodNotAllowed     ErrorCode = "METHOD_NOT_ALLOWED"
 	ErrCodeDivisionByZero       ErrorCode = "DIVISION_BY_ZERO"
 	ErrCodeMathDomainError      ErrorCode = "MATH_DOMAIN_ERROR"
 	ErrCodeResultOutOfRange     ErrorCode = "RESULT_OUT_OF_RANGE"

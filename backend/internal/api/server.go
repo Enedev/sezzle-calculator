@@ -20,6 +20,7 @@ func NewRouter(registry *calculator.Registry) http.Handler {
 	mux.HandleFunc("POST /api/v1/calculate", h.Calculate)
 
 	var handler http.Handler = mux
+	handler = apiRouteErrorsMiddleware(handler)
 	handler = CORSMiddleware(handler)
 	handler = LoggingMiddleware(handler)
 	handler = RecoverMiddleware(handler)
