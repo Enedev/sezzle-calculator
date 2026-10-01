@@ -7,5 +7,8 @@ func NewDefaultRegistry() *Registry {
 	r.Register(SubtractOp{})
 	r.Register(MultiplyOp{})
 	r.Register(DivideOp{})
+	r.Register(PowerOp{})
+	r.Register(SqrtOp{})
+	r.Register(PercentageOp{})
 	return r
 }
