@@ -24,7 +24,7 @@ Time budget: ~2–4 hours of equivalent work. Do not over-engineer.
 ## PROMPTS.md
 - `PROMPTS.md` is maintained by the author outside of this session. NEVER edit it.
 - If it has uncommitted changes when you commit, include it in a separate commit:
-  `docs(prompts): log phase <N>`.
+  `docs(prompts): update AI usage log`.
 
 ## Working rules
 - Work in phases. At the end of each phase STOP and wait for approval.
