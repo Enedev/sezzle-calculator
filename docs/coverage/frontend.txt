@@ -1,0 +1,25 @@
+# Frontend coverage report
+# Generated with: npm run test:coverage  (vitest run --coverage, v8 provider)
+# Files at 100% across every column are collapsed into "All files" by
+# vitest's default text reporter; only files with an uncovered line are
+# broken out below.
+
+ Test Files  7 passed (7)
+      Tests  51 passed (51)
+
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   94.07 |    79.27 |     100 |   99.27 |
+ hooks             |   91.42 |       75 |     100 |    98.9 |
+  friendlyMessage.ts|     100 |    83.33 |     100 |     100 | 28
+  useCalculator.ts  |    87.5 |    66.66 |     100 |    98.3 | 102
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 94.07% ( 143/152 )
+Branches     : 79.27% ( 88/111 )
+Functions    : 100% ( 39/39 )
+Lines        : 99.27% ( 137/138 )
+================================================================================
