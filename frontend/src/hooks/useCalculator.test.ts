@@ -223,6 +223,16 @@ describe('useCalculator', () => {
     expect(result.current.display).toBe('3');
   });
 
+  it('equals with an empty second operand repeats the first operand (5 + = -> 10)', async () => {
+    mockCalculate.mockResolvedValue(10);
+    const { result } = renderHook(() => useCalculator());
+    act(() => result.current.pressDigit('5'));
+    await pressOperator(result, 'add');
+    await pressEquals(result);
+    expect(mockCalculate).toHaveBeenCalledWith('add', [5, 5]);
+    expect(result.current.display).toBe('10');
+  });
+
   it('clear resets everything', async () => {
     const { result } = renderHook(() => useCalculator());
     act(() => result.current.pressDigit('9'));
