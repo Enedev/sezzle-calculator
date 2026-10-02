@@ -17,14 +17,15 @@ func main() {
 		port = "8080"
 	}
 	addr := ":" + port
+	staticDir := os.Getenv("STATIC_DIR")
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
 	registry := calculator.NewDefaultRegistry()
 
-	slog.Info("starting server", "addr", addr)
-	if err := api.Serve(ctx, addr, registry); err != nil {
+	slog.Info("starting server", "addr", addr, "staticDir", staticDir)
+	if err := api.Serve(ctx, addr, registry, staticDir); err != nil {
 		slog.Error("server failed", "error", err)
 		os.Exit(1)
 	}
