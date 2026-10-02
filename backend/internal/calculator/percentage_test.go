@@ -22,6 +22,10 @@ func TestPercentageOp(t *testing.T) {
 		{"overflow", math.MaxFloat64, 300, 0, calculator.ErrResultOutOfRange},
 		{"7 percent of 100 is exactly 7, not 7.000000000000001", 7, 100, 7, nil},
 		{"29 percent of 100 is exactly 29, not 28.999999999999996", 29, 100, 29, nil},
+		{
+			"huge operands whose product overflows but whose true percentage is in range",
+			1.6179238213760842e+308, 50, 8.089619106880421e+307, nil,
+		},
 	}
 	r := calculator.NewDefaultRegistry()
 	for _, tt := range tests {
