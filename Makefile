@@ -1,4 +1,7 @@
-.PHONY: build build-backend build-frontend test test-backend test-frontend run-backend run-frontend lint lint-backend lint-frontend
+.PHONY: build build-backend build-frontend test test-backend test-frontend \
+	coverage coverage-backend coverage-frontend \
+	run-backend run-frontend lint lint-backend lint-frontend \
+	docker-build docker-run
 
 build: build-backend build-frontend
 
@@ -29,3 +32,17 @@ lint-backend:
 
 lint-frontend:
 	cd frontend && npm run lint
+
+coverage: coverage-backend coverage-frontend
+
+coverage-backend:
+	cd backend && go test ./internal/... -coverprofile=cover.out -covermode=atomic && go tool cover -func=cover.out
+
+coverage-frontend:
+	cd frontend && npm run test:coverage
+
+docker-build:
+	docker compose build
+
+docker-run:
+	docker compose up
