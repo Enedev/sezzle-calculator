@@ -1,0 +1,37 @@
+:root {
+  --paper: #f4f7f3;
+  --greenbar: #dce8de;
+  --ink: #1e2321;
+  --ink-dim: #5c655f;
+  --stamp-red: #a8222d;
+
+  --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
+
+  font: 16px/1.5 var(--mono);
+  color-scheme: light;
+  color: var(--ink);
+  background: var(--paper);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--stamp-red);
+  outline-offset: 2px;
+}

@@ -1,0 +1,61 @@
+# Backend coverage report
+# Generated with: go test ./internal/... -coverprofile=cover.out -covermode=atomic
+#                 go tool cover -func=cover.out
+# CI enforces a >=90% gate on this total (see .github/workflows/ci.yml).
+
+ok  	sezzle-calculator/internal/api	0.060s	coverage: 96.6% of statements
+ok  	sezzle-calculator/internal/calculator	0.005s	coverage: 100.0% of statements
+
+sezzle-calculator/internal/api/errors.go:12:			writeJSON			75.0%
+sezzle-calculator/internal/api/errors.go:20:			writeError			100.0%
+sezzle-calculator/internal/api/errors.go:26:			domainErrorToAPI		100.0%
+sezzle-calculator/internal/api/handlers.go:22:			NewHandlers			100.0%
+sezzle-calculator/internal/api/handlers.go:26:			Healthz				100.0%
+sezzle-calculator/internal/api/handlers.go:30:			Operations			100.0%
+sezzle-calculator/internal/api/handlers.go:40:			Calculate			100.0%
+sezzle-calculator/internal/api/handlers.go:99:			hasJSONContentType		100.0%
+sezzle-calculator/internal/api/handlers.go:116:			decodeJSONError			100.0%
+sezzle-calculator/internal/api/middleware.go:11:		RecoverMiddleware		100.0%
+sezzle-calculator/internal/api/middleware.go:24:		LoggingMiddleware		100.0%
+sezzle-calculator/internal/api/middleware.go:43:		WriteHeader			100.0%
+sezzle-calculator/internal/api/middleware.go:49:		CORSMiddleware			100.0%
+sezzle-calculator/internal/api/route_errors.go:14:		apiRouteErrorsMiddleware	100.0%
+sezzle-calculator/internal/api/route_errors.go:50:		newBufferingResponseWriter	100.0%
+sezzle-calculator/internal/api/route_errors.go:54:		Header				100.0%
+sezzle-calculator/internal/api/route_errors.go:56:		WriteHeader			100.0%
+sezzle-calculator/internal/api/route_errors.go:58:		Write				100.0%
+sezzle-calculator/internal/api/server.go:17:			newAPIHandler			100.0%
+sezzle-calculator/internal/api/server.go:28:			withCommonMiddleware		100.0%
+sezzle-calculator/internal/api/server.go:37:			NewRouter			100.0%
+sezzle-calculator/internal/api/server.go:46:			NewRouterWithStatic		100.0%
+sezzle-calculator/internal/api/server.go:54:			newHTTPServer			100.0%
+sezzle-calculator/internal/api/server.go:70:			Serve				76.5%
+sezzle-calculator/internal/api/static.go:17:			withStaticFallback		100.0%
+sezzle-calculator/internal/calculator/add.go:5:			Name				100.0%
+sezzle-calculator/internal/calculator/add.go:7:			Arity				100.0%
+sezzle-calculator/internal/calculator/add.go:9:			Apply				100.0%
+sezzle-calculator/internal/calculator/default_registry.go:4:	NewDefaultRegistry		100.0%
+sezzle-calculator/internal/calculator/divide.go:5:		Name				100.0%
+sezzle-calculator/internal/calculator/divide.go:7:		Arity				100.0%
+sezzle-calculator/internal/calculator/divide.go:9:		Apply				100.0%
+sezzle-calculator/internal/calculator/multiply.go:5:		Name				100.0%
+sezzle-calculator/internal/calculator/multiply.go:7:		Arity				100.0%
+sezzle-calculator/internal/calculator/multiply.go:9:		Apply				100.0%
+sezzle-calculator/internal/calculator/percentage.go:9:		Name				100.0%
+sezzle-calculator/internal/calculator/percentage.go:11:		Arity				100.0%
+sezzle-calculator/internal/calculator/percentage.go:13:		Apply				100.0%
+sezzle-calculator/internal/calculator/power.go:7:		Name				100.0%
+sezzle-calculator/internal/calculator/power.go:9:		Arity				100.0%
+sezzle-calculator/internal/calculator/power.go:11:		Apply				100.0%
+sezzle-calculator/internal/calculator/registry.go:15:		NewRegistry			100.0%
+sezzle-calculator/internal/calculator/registry.go:21:		Register			100.0%
+sezzle-calculator/internal/calculator/registry.go:29:		Get				100.0%
+sezzle-calculator/internal/calculator/registry.go:36:		List				100.0%
+sezzle-calculator/internal/calculator/registry.go:55:		Calculate			100.0%
+sezzle-calculator/internal/calculator/sqrt.go:7:		Name				100.0%
+sezzle-calculator/internal/calculator/sqrt.go:9:		Arity				100.0%
+sezzle-calculator/internal/calculator/sqrt.go:11:		Apply				100.0%
+sezzle-calculator/internal/calculator/subtract.go:5:		Name				100.0%
+sezzle-calculator/internal/calculator/subtract.go:7:		Arity				100.0%
+sezzle-calculator/internal/calculator/subtract.go:9:		Apply				100.0%
+total:								(statements)			97.6%

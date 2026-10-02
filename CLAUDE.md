@@ -24,13 +24,16 @@ Time budget: ~2–4 hours of equivalent work. Do not over-engineer.
 ## PROMPTS.md
 - `PROMPTS.md` is maintained by the author outside of this session. NEVER edit it.
 - If it has uncommitted changes when you commit, include it in a separate commit:
-  `docs(prompts): log phase <N>`.
+  `docs(prompts): update AI usage log`.
 
 ## Working rules
 - Work in phases. At the end of each phase STOP and wait for approval.
 - Never claim something works without running it. Run tests and linters after every change.
 - If a requirement is ambiguous, state the assumption explicitly and record it for the README.
 - Prefer simple, idiomatic code over clever code. Comment only non-obvious decisions.
+- Use skills and subagents whenever they add independent value (e.g. a subagent that tests
+  or reviews without seeing the implementation, a skill for a specialized domain). Never use
+  them just for show. Justify each one in the phase report.
 
 ## End-of-phase report (always use this format)
 ```

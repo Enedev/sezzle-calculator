@@ -1,0 +1,147 @@
+.page {
+  min-height: 100svh;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.calculator {
+  width: 100%;
+  max-width: 380px;
+  min-height: 100svh;
+  margin: 0 auto;
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 440px) {
+  .page {
+    align-items: center;
+    padding: 2rem 1rem;
+  }
+  .calculator {
+    min-height: auto;
+    border-radius: 6px;
+    box-shadow: 0 20px 40px -20px rgba(30, 35, 33, 0.35);
+    overflow: hidden;
+  }
+}
+
+.display {
+  position: relative;
+  padding: 2rem 1.25rem 1.25rem;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 1.6em,
+    var(--greenbar) 1.6em,
+    var(--greenbar) 3.2em
+  );
+  min-height: 7.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border-bottom: 2px dashed var(--ink-dim);
+  transition: opacity 0.15s ease;
+}
+
+.calculator[data-loading='true'] .display-value {
+  opacity: 0.45;
+}
+
+.display-expression {
+  font-size: 1rem;
+  color: var(--ink-dim);
+  text-align: right;
+  min-height: 1.4em;
+  white-space: pre;
+}
+
+.display-value-row {
+  text-align: right;
+}
+
+.display-value {
+  font-size: 2.75rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  word-break: break-all;
+}
+
+.error-stamp {
+  display: inline-block;
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--stamp-red);
+  border: 3px solid var(--stamp-red);
+  border-radius: 4px;
+  padding: 0.3em 0.6em;
+  transform: rotate(-4deg);
+  background: rgba(168, 34, 45, 0.06);
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--ink);
+  padding-top: 1px;
+  flex: 1;
+}
+
+.btn {
+  border: none;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 1.25rem;
+  padding: 1.1rem 0;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--greenbar);
+}
+
+.btn:active:not(:disabled) {
+  background: #cfe0d2;
+}
+
+.btn:disabled {
+  color: #b7bcb8;
+  cursor: default;
+}
+
+.btn-operator {
+  color: var(--stamp-red);
+  font-weight: 600;
+}
+
+.btn-function {
+  color: var(--ink-dim);
+}
+
+.btn-equals {
+  grid-column: 1 / -1;
+  background: var(--stamp-red);
+  color: #fff;
+  font-weight: 600;
+  padding: 1.3rem 0;
+}
+
+.btn-equals:hover:not(:disabled) {
+  background: #8c1c26;
+}
+
+.btn-equals:active:not(:disabled) {
+  background: #731720;
+}
+
+.btn-equals:disabled {
+  background: #c98d93;
+  color: #fff;
+}
