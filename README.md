@@ -316,6 +316,26 @@ trade-off or a stdlib constraint rather than a bug:
   exported error type for that case. It's covered by tests today, but would silently
   stop matching if a future Go version changes that wording.
 
+Flagged by a second independent review on PR #1; style/efficiency observations, not
+fixed:
+
+- The keyboard listener in `useKeyboardInput.ts` is torn down and re-attached on every
+  keystroke, since `useCalculator`'s returned object (and its state-dependent
+  callbacks) gets a new identity on every render.
+- The frontend hardcodes the operator list and arity in three places (`useCalculator.ts`,
+  `Keypad.tsx`, `useKeyboardInput.ts`) instead of driving them from `GET /api/v1/operations`,
+  which the client already fetches but the UI never calls.
+- `apiRouteErrorsMiddleware` buffers the entire response body into memory on every
+  `/api/` request just to inspect the status code.
+- `useCalculator`'s `status` and `errorMessage` are two independent fields that must be
+  kept in sync by convention rather than a single tagged union.
+- `handlers_test.go` and `contract_test.go` define overlapping request-building test
+  helpers in the same package instead of sharing one set.
+- `sqrt.go`'s explicit negative-operand check duplicates what `Registry.Calculate`'s
+  centralized NaN classification already handles for free.
+- `Keypad.tsx` hand-writes 17 near-identical `<Button>` elements instead of mapping
+  over a small layout array.
+
 ## AI usage
 
 This project was built with Claude Code, working in phases with human approval between
