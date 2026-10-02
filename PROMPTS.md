@@ -336,4 +336,297 @@ report so I can rerun some of them myself. Give me the Phase 2 report.
 
 ---
 
-<!-- Next entries are appended below -->
+## 05 — Error-shape fix + Phase 3: React frontend
+
+| Field | Value |
+|---|---|
+| **Model** | Claude Opus 5.5 |
+| **Mode** | Auto mode |
+| **Skills** | `frontend-design` — visual direction (aesthetic, typography, palette, layout) |
+| **Subagents** | — |
+| **Tools** | Bash (npm run typecheck/lint/test/build, curl, git), Read, Write, Edit, Skill, AskUserQuestion |
+| **Phase** | 3 — Frontend |
+
+**Prompt:**
+```text
+Phase 2 approved. I manually verified some of the curl smoke tests myself.
+
+Before Phase 3:
+0. Update the PROMPTS.md rule in CLAUDE.md: commit it as
+   "docs(prompts): update AI usage log" (don't guess phase numbers). Commit (chore: ...).
+1. Error-shape consistency: 404 and 405 under /api/ must use the same JSON error
+   envelope as every other error (NOT_FOUND, METHOD_NOT_ALLOWED, with an Allow header
+   on 405). Keep / free for serving the frontend in Phase 4. Test-first. Commit as fix(api): ...
+
+Phase 3 — Frontend. Do it in two steps:
+
+Step A (stop and wait for my approval):
+- Load the frontend-design skill and propose the visual direction: aesthetic,
+  typography, color palette, layout on mobile and desktop, and why it fits a
+  calculator from a fintech company. Text description is enough.
+- Propose the exact UX for sqrt and percentage under the immediate-execution model,
+  as key-press sequences with the API calls each one triggers. Include what
+  happens on errors (e.g. after DIVISION_BY_ZERO, what does the display show and
+  what does the next key press do?).
+
+Step B (after my approval): implement as planned — typed API client, useCalculator
+hook as a state machine, presentational components, keyboard support, aria-live
+result, error-code → friendly message mapping, Vite proxy. Tests first for the
+hook's state transitions and the client's error mapping. Finish with typecheck,
+lint, vitest --coverage and build, and give me the Phase 3 report.
+```
+
+**Human actions & decisions:**
+- **Kept the error shape consistent:** in the Phase 2 report I noticed that 404/405 returned
+  plain text while every other error used the JSON envelope, which would force the frontend
+  to handle two formats. Required JSON 404/405 under `/api/`, leaving `/` free for the SPA.
+- **Chose the `frontend-design` skill** so the UI would have a deliberate direction instead
+  of a template look. The skill made Claude reject its own first draft (dark navy with one
+  bright accent) as a generic default and move to an accounting-ledger concept.
+- **Added a design gate (Step A):** the visual direction and the exact √ / % key sequences,
+  including the behavior after an error, had to be approved before any UI code. I reviewed
+  both proposals and approved them as presented ("Ledger Tape": greenbar paper,
+  right-aligned tape display, rubber-stamp errors, IBM Plex Mono).
+- Decided not to install Playwright only to take a screenshot. Instead **I tested the UI
+  myself in the browser**: `2 + 3 × 4 = 20`, `9 √ = 3`, division by zero showing a
+  friendly error, keyboard input, and the mobile layout. Everything behaved as specified.
+
+**Outcome:**
+- JSON 404/405 envelope.
+- Typed API client and `useCalculator` as an immediate-execution state machine.
+- Keyboard support, error-code → friendly message mapping, Vite dev proxy.
+- 51/51 tests; 99% line coverage on the new code; typecheck, lint and build clean.
+
+**Commits:** `60c11a5` docs(prompts) · `4d7e297` chore: fixed commit message for PROMPTS.md ·
+`cc2c01d` fix(api): JSON error envelope for 404/405 · `9134f9d` feat(frontend): typed api client ·
+`7b83bab` feat(frontend): useCalculator state machine · `da042e3` feat(frontend): keypad, display
+and calculator components (Ledger Tape design) · `1249ed6` build(frontend): dev proxy and env config
+
+---
+
+## 06 — Tooling cleanup + Phase 4: Docker and CI
+
+| Field | Value |
+|---|---|
+| **Model** | Claude Opus 5.5 |
+| **Mode** | Auto mode |
+| **Skills** | — |
+| **Subagents** | — |
+| **Tools** | Bash (go test, npm, make, git), Read, Write, Edit |
+| **Phase** | 4 — Docker + CI |
+
+**Prompt:**
+```text
+Phase 3 approved. I opened the app in my browser and tested it manually.
+
+Before Phase 4, fix the project layout of the skill:
+0. The frontend-design skill was installed under backend/.claude/skills/ because the
+   shell was in backend/. Move it to the repository root: .claude/skills/frontend-design/
+   and move backend/skills-lock.json to the root as well. Add a root .gitignore that
+   ignores .claude/settings.local.json. Commit as chore: ... — the skill is part of the
+   project tooling and should be versioned.
+
+Phase 4 — Docker + CI, as planned:
+- Multi-stage Dockerfile: node build of the frontend, go build of the backend
+  (CGO_ENABLED=0, -trimpath, -ldflags "-s -w"), final minimal image (distroless or
+  alpine, non-root user) where the Go server serves the API under /api/ and the built
+  SPA from / (unknown non-API paths fall back to index.html; /api/* never does).
+- Add a test for the static/SPA serving and the /api/ precedence.
+- docker-compose.yml with a healthcheck on /healthz. .dockerignore.
+- GitHub Actions: backend job (go vet, go test with coverage gate >= 90% on internal/),
+  frontend job (typecheck, lint, vitest with coverage, build), and a job that builds
+  the Docker image. Cache Go modules and npm.
+- Makefile targets: test, coverage, run-backend, run-frontend, docker-build, docker-run.
+
+Docker CLI is not yet available inside WSL: write everything, then stop and tell me,
+I'll enable Docker Desktop's WSL integration and you'll verify docker compose up
+end to end (curl /healthz, one calculation, and the SPA at /).
+Give me the Phase 4 report.
+```
+
+**Human actions & decisions:**
+- **Caught a tooling mistake:** the `frontend-design` skill had been installed inside
+  `backend/.claude/` because the shell was in `backend/`. Had it moved to the repository root
+  and **versioned it**, so the skill is part of the project's tooling for anyone who clones it.
+- **Installed the official `code-review` plugin** (`code-review@claude-plugins-official`) at
+  project scope, so `.claude/settings.json` declares it for the whole project. Planned it for
+  the final review.
+- Specified the hardening of the image: static binary, `-trimpath`, stripped symbols,
+  non-root user, `/api/*` never falling back to `index.html`.
+- **Enabled Docker in WSL and verified the image myself** with `docker compose up --build`:
+  the SPA and the API served on `:8080` and calculations worked end to end in the browser.
+- Accepted Alpine over distroless: distroless has no shell or `wget`, so the compose
+  healthcheck on `/healthz` couldn't run inside the container.
+
+**Outcome:**
+- Go server serves the built SPA with fallback, with `/api/` and `/healthz` always taking precedence (tested).
+- Multi-stage Dockerfile; compose file with healthcheck.
+- 3-job GitHub Actions workflow with a hard 90% backend coverage gate; Makefile targets.
+- Claude checked the coverage-gate script against a fabricated 85% profile to confirm it really fails.
+
+**Commits:** `2328ff9` chore: move frontend-design skill to repo root · `65ec21c` feat(api): serve
+the built frontend with SPA fallback · `c7679ea` build: multi-stage dockerfile · `b2e3703` build:
+docker-compose · `bdffa5c` ci: github actions workflow · `6576853` build: coverage and docker targets
+
+---
+
+## 07 — Phase 5: README and coverage reports
+
+| Field | Value |
+|---|---|
+| **Model** | Claude Opus 5.5 |
+| **Mode** | Auto mode (after `/compact`) |
+| **Skills** | — |
+| **Subagents** | — |
+| **Tools** | Bash (go, npm, curl, git), Read, Write |
+| **Phase** | 5 — Documentation |
+
+**Prompt:**
+```text
+Phase 4 approved. I verified Docker myself: docker compose up --build serves the SPA
+and the API on :8080, and calculations work end to end in the browser.
+Keep reports short from now on.
+
+Phase 5 — README + coverage:
+- README.md as planned: overview, Mermaid architecture diagram, prerequisites,
+  run with Docker (first option), run backend/frontend natively (plain commands, make
+  as optional shortcut), tests + coverage, curl examples for every operation and every
+  error code, and design decisions: immediate-execution input model, percentage =
+  a*b/100 (and the bug that motivated it), float64 trade-off referencing the 0.1+0.2
+  test, 400/413/415/422 split, Registry.Calculate owning domain rules, hand-written
+  mocks vs MSW, Alpine vs distroless, STATIC_DIR. Then assumptions, what I'd do with
+  more time (operator precedence via an expression endpoint, decimal arithmetic,
+  E2E tests with Playwright), and an "AI usage" section linking PROMPTS.md and CLAUDE.md.
+- Commit coverage summaries as text in docs/coverage/ (go tool cover -func output and
+  vitest's text summary); HTML reports stay generated locally via make coverage.
+- Verify every command in the README actually works (except Docker, already verified by me).
+Commit and give me the Phase 5 report. Do not push.
+```
+
+**Human actions & decisions:**
+- Ran `/compact` before this phase to cut the accumulated context and the token cost.
+- Listed the design decisions the README had to defend, so the documentation explains
+  my reasoning (immediate execution, the percentage bug, float64, the status-code split)
+  instead of only describing the code.
+- Docker first in the README because it's the zero-setup path for reviewers; native
+  commands remain, with `make` only as a shortcut.
+
+**Outcome:** README with a Mermaid diagram, run instructions, a full API reference and
+19 curl examples, all executed against a live server before being written down.
+Coverage snapshots committed to `docs/coverage/`.
+
+**Commits:** `642ec02` docs: add comprehensive readme · `2ad8c87` docs: commit coverage report snapshots
+
+---
+
+## 08 — Phase 6 + 7: independent review, clean-clone check and delivery
+
+| Field | Value |
+|---|---|
+| **Model** | Claude Opus 5.5 |
+| **Mode** | Auto mode |
+| **Skills** | `code-review` plugin (`/code-review` on PR #1) |
+| **Subagents** | `general-purpose` — cold reviewer with no context of the session, given only the assignment and the repo |
+| **Tools** | Bash (git, gh, go test, npm), Read, Write, Edit, Agent |
+| **Phase** | 6 — Review · 7 — Delivery |
+
+**Prompt:**
+```text
+Phase 5 approved. Final phases, keep it short.
+
+Phase 6 — Independent review:
+1. Spawn a general-purpose subagent that has NOT seen this session. Give it only the
+   assignment text from my first prompt and the repo path. Ask it to review the repo
+   as a strict Sezzle interviewer: correctness, edge cases, idiomatic Go/React,
+   test gaps, README accuracy. Output: findings ranked by severity, max 10.
+2. Fix ONLY correctness or security findings (tests first). Do not fix style or
+   nice-to-haves: list them with a one-line reason in a "Known limitations" section
+   of the README.
+3. Show me the findings table: finding | severity | fixed or not | why.
+
+Phase 7 — Delivery (I authorize these pushes):
+1. Clean-clone check: git clone the repo into /tmp/verify, run go test ./... in
+   backend and npm ci && npm test && npm run build in frontend. Fix anything that fails.
+2. git push origin 1d3c531:refs/heads/main   (main = guardrails commit only)
+3. git push -u origin HEAD:feature/calculator
+4. gh pr create --base main --head feature/calculator with a concise description
+   (what's included, how to run, how it was tested). No AI attribution.
+Give me the PR number and stop.
+```
+
+**Human actions & decisions:**
+- Designed two independent review layers: a subagent that never saw the implementation,
+  and the `code-review` plugin on the pull request.
+- Set the fix policy: only correctness and security findings get fixed; everything else
+  is disclosed in the README as a known limitation instead of being silently ignored.
+- Chose a PR-based delivery: `main` holds only the guardrails commit and the whole
+  implementation arrives through PR #1, so it can be reviewed as a single diff.
+- **Merged PR #1 on GitHub.** I ran `/code-review` right after merging; it should have run
+  before the merge, so its findings were handled in a follow-up commit on `main` (entry 09).
+
+**Outcome:**
+- **Cold review:**
+  - Fixed: `http.Server` timeouts against slow-client DoS (security).
+  - Added: a test for the documented "equals with empty operand" behavior.
+  - Documented as known limitations: untested bind-error path, CORS without an env toggle,
+    unknown-field detection relying on the stdlib error text.
+- **Clean-clone check** passed (backend tests, frontend `npm ci`, tests and build).
+- **`/code-review`:** 10 findings. One real regression, confirmed by executing it: the
+  `a*b/100` percentage fix overflows for operands near the float64 limit. The other nine
+  are efficiency or simplification items.
+
+**Commits:** `b29985b` fix(api): set http.Server timeouts · `253e8cd` test(frontend): equals with
+empty operand · `50b1fb8` docs: known limitations · `8f1d5a8` docs: refresh coverage snapshots ·
+`959a010` Merge pull request #1
+
+---
+
+## 09 — Code-review follow-up
+
+| Field | Value |
+|---|---|
+| **Model** | Claude Opus 5.5 |
+| **Mode** | Auto mode |
+| **Skills** | — |
+| **Subagents** | — |
+| **Tools** | Bash (go test, npm test, git), Read, Edit |
+| **Phase** | 6 — Review follow-up |
+
+**Prompt:**
+```text
+Code review findings on PR #1 (already merged). Fix only the correctness one, on main:
+1. Percentage overflow regression: a*b/100 overflows for huge operands
+   (percentage(1.6179238213760842e+308, 50) returns RESULT_OUT_OF_RANGE instead of ~8.09e307).
+   Compute a*b/100 and, only if that product is ±Inf, fall back to (a/100)*b.
+   Keep 7% of 100 = 7 and 29% of 100 = 29. Regression test first. Commit fix(calculator): ...
+2. Add the other code-review findings to the README "Known limitations" as one-line items,
+   no code changes: keyboard listener re-attached on every keystroke, operators hardcoded
+   in the frontend instead of using GET /api/v1/operations, route-error middleware buffering
+   every /api response, status/errorMessage as separate fields, duplicated test helpers,
+   redundant sqrt negative check, repetitive keypad markup. Commit docs: ...
+3. Commit PROMPTS.md per CLAUDE.md, run all backend and frontend tests, push main.
+   Short report.
+```
+
+**Human actions & decisions:**
+- Triaged the `code-review` findings myself:
+  - Fixed the overflow regression with a fallback that keeps the exact results for typical
+    inputs (`7% of 100 = 7`) and the full float64 range.
+  - Disclosed the nine non-correctness findings in the README rather than expanding scope
+    past the 2–4 hour budget.
+
+**Outcome:** Percentage overflow fixed with a regression test; known limitations updated; main pushed.
+
+---
+
+## Summary
+
+| Metric | Value |
+|---|---|
+| Prompts executed in Claude Code | 9 |
+| Model | Claude Opus 5.5 (all phases) |
+| Skills / plugins | `frontend-design` (Phase 3) · `code-review` plugin (Phase 6) |
+| Subagents | `Explore` + `Plan` (planning) · `general-purpose` blind contract tester (Phase 2) · `general-purpose` cold reviewer (Phase 6) |
+| Bugs found by human review | Percentage precision (`7% of 100 = 7.000000000000001`), `null` operands decoded as 0, inconsistent 404/405 error shape, skill installed in the wrong directory |
+| Bugs found by AI review | Missing server timeouts (cold review), percentage overflow regression (`code-review`) |
+| Final coverage | Backend `internal/` ≥ 97% (CI gate 90%) · Frontend 99% lines |
