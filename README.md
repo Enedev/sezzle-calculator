@@ -297,6 +297,25 @@ output before writing this README.
   running expression line; persisting a scrollable history of past calculations would
   extend that idea naturally.
 
+## Known limitations
+
+Flagged by an independent cold review (Phase 6); not fixed because each is a disclosed
+trade-off or a stdlib constraint rather than a bug:
+
+- **`Serve`'s bind-error path is untested** (e.g. `ListenAndServe` failing because the
+  port is already in use) — the only test exercises graceful shutdown, not that
+  failure branch. Low risk: the branch is a 3-line `errors.Is` check with no logic
+  worth regressing.
+- **CORS has no environment-based toggle** — `Access-Control-Allow-Origin: *` is
+  hardcoded on, with no way to restrict it outside of editing source. Low risk in
+  practice: the shipped Docker image serves the frontend and API from the same
+  origin, so the permissive header is only reachable if someone deliberately points a
+  different origin at the API.
+- **Unknown-JSON-field detection matches on error text** (`decodeJSONError` greps for
+  `"unknown field"` in `encoding/json`'s error string) because the stdlib has no
+  exported error type for that case. It's covered by tests today, but would silently
+  stop matching if a future Go version changes that wording.
+
 ## AI usage
 
 This project was built with Claude Code, working in phases with human approval between
