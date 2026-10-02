@@ -47,6 +47,21 @@ func NewRouterWithStatic(registry *calculator.Registry, staticDir string) http.H
 	return withCommonMiddleware(withStaticFallback(newAPIHandler(registry), staticDir))
 }
 
+// newHTTPServer sets conservative timeouts so a client that sends headers or
+// a body slowly (or never finishes) can't hold a connection open forever —
+// without these, net/http's zero-value (no timeout) defaults leave the
+// server open to Slowloris-style connection exhaustion.
+func newHTTPServer(addr string, handler http.Handler) *http.Server {
+	return &http.Server{
+		Addr:              addr,
+		Handler:           handler,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       60 * time.Second,
+	}
+}
+
 // Serve starts the HTTP server on addr and blocks until either it fails to
 // serve or ctx is canceled, in which case it shuts down gracefully. Signal
 // handling is the caller's responsibility (see cmd/server), which keeps this
@@ -60,10 +75,7 @@ func Serve(ctx context.Context, addr string, registry *calculator.Registry, stat
 		handler = NewRouterWithStatic(registry, staticDir)
 	}
 
-	srv := &http.Server{
-		Addr:    addr,
-		Handler: handler,
-	}
+	srv := newHTTPServer(addr, handler)
 
 	serveErr := make(chan error, 1)
 	go func() {
