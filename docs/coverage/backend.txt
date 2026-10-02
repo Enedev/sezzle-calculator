@@ -3,7 +3,7 @@
 #                 go tool cover -func=cover.out
 # CI enforces a >=90% gate on this total (see .github/workflows/ci.yml).
 
-ok  	sezzle-calculator/internal/api	0.061s	coverage: 96.5% of statements
+ok  	sezzle-calculator/internal/api	0.060s	coverage: 96.6% of statements
 ok  	sezzle-calculator/internal/calculator	0.005s	coverage: 100.0% of statements
 
 sezzle-calculator/internal/api/errors.go:12:			writeJSON			75.0%
@@ -28,7 +28,8 @@ sezzle-calculator/internal/api/server.go:17:			newAPIHandler			100.0%
 sezzle-calculator/internal/api/server.go:28:			withCommonMiddleware		100.0%
 sezzle-calculator/internal/api/server.go:37:			NewRouter			100.0%
 sezzle-calculator/internal/api/server.go:46:			NewRouterWithStatic		100.0%
-sezzle-calculator/internal/api/server.go:55:			Serve				76.5%
+sezzle-calculator/internal/api/server.go:54:			newHTTPServer			100.0%
+sezzle-calculator/internal/api/server.go:70:			Serve				76.5%
 sezzle-calculator/internal/api/static.go:17:			withStaticFallback		100.0%
 sezzle-calculator/internal/calculator/add.go:5:			Name				100.0%
 sezzle-calculator/internal/calculator/add.go:7:			Arity				100.0%
